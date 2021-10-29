@@ -10,6 +10,9 @@ public:
     void goTo(int pos);
     int getPos();
 private:
+    int posMapMin = 0;
+    int posMapMax = 0;
+    int mapPos(int pos);
     int endPos;
     int startPos;
 };
