@@ -40,6 +40,6 @@ int StepMotor::getPos()
 int StepMotor::mapPercentToPos(int percent)
 {
     int range = startPos - endPos;
-    int step = (int)range / 100;
-    return step * percent;
+    int step = range / 100;
+    return (int) step * percent;
 }
