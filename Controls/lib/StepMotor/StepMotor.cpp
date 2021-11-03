@@ -1,34 +1,45 @@
 #include "StepMotor.h"
 
-
 StepMotor::StepMotor(int motorInterfaceType, int stepPin, int dirPin) : AccelStepper(motorInterfaceType, stepPin, dirPin) {}
 
-void StepMotor::calibrate() {
-    setCurrentPosition(0); // This is an inherited method
-    //TODO
-    // The below variables will keep track of the start and end of the rail system
-    // These values should be calculated from our calibration
-    
-    this -> startPos = -200;
-    this -> endPos = 321;
+void StepMotor::setup(int maxSpeed, int accel, int startPos = 0)
+{
+    this->setAcceleration(accel);
+    this->setMaxSpeed(maxSpeed);
+    this->setCurrentPosition(startPos);
 }
 
-void StepMotor::goTo(int pos) {
-    int mappedPos = mapPos(pos);
-    // mappedPos should be a number between startPos and endPos
-    //TODO
-    ;
-}
-
-int StepMotor::getPos() {
-    return currentPosition();
-}
-
-int StepMotor::mapPos(int pos) {
+void StepMotor::calibrate()
+{
+    this->setCurrentPosition(0);
     // TODO
-    // pos will be an int between posMapMin and posMapMax
-    // map this value onto a new scale from startPos to endPos
-    // This makes it easy to call goTo(50) which should
-    // bring us to the middle of the line
-    return 0;
+    //  The below variables will keep track of the start and end of the rail system
+    //  These values should be calculated from our calibration
+    this->startPos = -1000;
+    this->endPos = 1000;
+}
+
+void StepMotor::run(int speed)
+{
+    this->setSpeed(speed);
+    this->runSpeed();
+}
+
+void StepMotor::goTo(int percent)
+{
+    int pos = mapPercentToPos(percent);
+    this->moveTo(pos);
+    this->runToPosition();
+}
+
+int StepMotor::getPos()
+{
+    return this->currentPosition();
+}
+
+int StepMotor::mapPercentToPos(int percent)
+{
+    int range = startPos - endPos;
+    int step = range / 100;
+    return (int) step * percent;
 }
