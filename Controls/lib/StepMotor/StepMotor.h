@@ -9,8 +9,7 @@ public:
     void calibrate();
     void goTo(int pos);
     int getPos();
-    void run(int speed);
-    void setup(int maxSpeed, int accel, int startPos = 0);
+    void setup(int maxSpeed, int accel, int startPos);
 private:
     int mapPercentToPos(int pos);
     int endPos;
