@@ -2,7 +2,7 @@
 
 StepMotor::StepMotor(int motorInterfaceType, int stepPin, int dirPin) : AccelStepper(motorInterfaceType, stepPin, dirPin) {}
 
-void StepMotor::setup(int maxSpeed, int accel, int startPos = 0)
+void StepMotor::setup(int maxSpeed, int accel, int startPos)
 {
     this->setAcceleration(accel);
     this->setMaxSpeed(maxSpeed);
@@ -19,17 +19,11 @@ void StepMotor::calibrate()
     this->endPos = 1000;
 }
 
-void StepMotor::run(int speed)
-{
-    this->setSpeed(speed);
-    this->runSpeed();
-}
-
 void StepMotor::goTo(int percent)
 {
     int pos = mapPercentToPos(percent);
     this->moveTo(pos);
-    this->runToPosition();
+    this->run();
 }
 
 int StepMotor::getPos()
