@@ -1,29 +1,38 @@
 #include <Arduino.h>
 #include <StepMotor.h>
+#include <MultiStepper.h>
 #include <Order.h>
 
+#define yMaxPin 6
+#define yMinPin 7
+#define xMaxPin 6
+#define xMinPin 7
 
-#define dirPin 2
-#define stepPin 3
 #define motorInterfaceType 1
+const int stepPins[3] =  {1, 3, 5};
+const int dirPins[3] = {0, 2, 4};
 
 
-StepMotor stepper = StepMotor(motorInterfaceType, stepPin, dirPin);
+StepMotor step = StepMotor(motorInterfaceType, stepPins, dirPins);
 Order order = Order();
 
 void setup()
 {
     order.connectWifi();
-    stepper.setup(1000, 800, 0);
-    stepper.calibrate();
+    int startingPos[2] = {0,0};
+    step.setup(1000, 500, 500, startingPos);
+    //step.calibrate(yMinPin, yMaxPin, xMinPin, xMaxPin);
 }
 
 void loop()
 {
     order.getOrder();
-    delay(5000);
-    stepper.goTo(100);
-    delay(1000);
-    stepper.goTo(0);
-    delay(1000);
+    switch(order.mode) {
+        case 10:
+            ; // No new order
+        case 0:
+            ; // Ramen mode
+        case 1:
+            ; // Game mode
+    }
 }

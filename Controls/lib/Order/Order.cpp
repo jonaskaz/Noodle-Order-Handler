@@ -41,6 +41,10 @@ void Order::parseOrder(String payload)
         Serial.println(error.f_str());
         return;
     }
+    if (!doc.containsKey("mode")) {
+        mode = 10;
+        return;
+    }
     mode = doc["mode"];
     flavor = doc["flavor"];
     toppings = doc["toppings"];
