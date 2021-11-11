@@ -13,12 +13,12 @@ public:
     const char* url = "http://cupnoodle-api.herokuapp.com/order";
     WiFiClient client;
     HTTPClient http;
+    int mode;
+    const char* flavor;
+    JsonArray toppings;
 private:
     const char* SSID = "OLIN-DEVICES";
     const char* PWD = "Design&Fabric8";
     StaticJsonDocument<200> doc;
-    int mode;
-    const char* flavor;
-    JsonArray toppings;
     void parseOrder(String payload);
 };

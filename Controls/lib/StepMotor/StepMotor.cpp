@@ -1,39 +1,98 @@
 #include "StepMotor.h"
 
-StepMotor::StepMotor(int motorInterfaceType, int stepPin, int dirPin) : AccelStepper(motorInterfaceType, stepPin, dirPin) {}
 
-void StepMotor::setup(int maxSpeed, int accel, int startPos)
-{
-    this->setAcceleration(accel);
-    this->setMaxSpeed(maxSpeed);
-    this->setCurrentPosition(startPos);
+StepMotor::StepMotor(int motorInterfaceType, const int stepPins[3], const int dirPins[3]){
+    stepper1 = AccelStepper(motorInterfaceType, stepPins[0], dirPins[0]);
+    stepper2 = AccelStepper(motorInterfaceType, stepPins[1], dirPins[1]);
+    stepper3 = AccelStepper(motorInterfaceType, stepPins[2], dirPins[2]);
 }
 
-void StepMotor::calibrate()
+void StepMotor::setupHelper(AccelStepper stepper, int maxSpeed, int accel, int startPos)
 {
-    this->setCurrentPosition(0);
-    // TODO
-    //  The below variables will keep track of the start and end of the rail system
-    //  These values should be calculated from our calibration
-    this->startPos = -1000;
-    this->endPos = 1000;
+    stepper.setAcceleration(accel);
+    stepper.setMaxSpeed(maxSpeed);
+    stepper.setCurrentPosition(startPos);
 }
 
-void StepMotor::goTo(int percent)
+void StepMotor::setup(int maxSpeed, int accelx, int accely, int startPos[2])
 {
-    int pos = mapPercentToPos(percent);
-    this->moveTo(pos);
-    this->run();
+    setupHelper(stepper1, maxSpeed, accelx, startPos[0]);
+    setupHelper(stepper2, maxSpeed, accely, startPos[1]);
+    setupHelper(stepper3, maxSpeed, accely, startPos[1]);
+    steppers.addStepper(stepper1);
+    steppers.addStepper(stepper2);
+    steppers.addStepper(stepper3);
 }
 
-int StepMotor::getPos()
+void StepMotor::calibrate(int yMinPin, int yMaxPin, int xMinPin, int xMaxPin)
 {
-    return this->currentPosition();
+    ezButton yMinLimit(yMinPin);
+    ezButton yMaxLimit(yMaxPin);
+    ezButton xMinLimit(xMinPin);
+    ezButton xMaxLimit(xMaxPin);
+    while (yMaxLimit.isReleased()) {
+        long positions[3] = {0, 100000, 100000};
+        steppers.moveTo(positions);
+        steppers.run();
+    }
+    yMax = stepper2.currentPosition();
+    while (yMinLimit.isReleased()) {
+        long positions[3] = {0, -100000, -100000};
+        steppers.moveTo(positions);
+        steppers.run();
+    }
+    yMin = stepper2.currentPosition();
+    while (xMinLimit.isReleased()) {
+        long positions[3] = {-100000, yMin, yMin};
+        steppers.moveTo(positions);
+        steppers.run();
+    }
+    xMin = stepper1.currentPosition();
+    while (xMaxLimit.isReleased()) {
+        long positions[3] = {100000, yMin, yMin};
+        steppers.moveTo(positions);
+        steppers.run();
+    }
+    xMax = stepper1.currentPosition();
 }
 
-int StepMotor::mapPercentToPos(int percent)
+void StepMotor::goTo(int percentx, int percenty)
 {
-    int range = startPos - endPos;
-    int step = range / 100;
-    return (int) step * percent;
+    long * pos = mapPercentToPos(percentx, percenty);
+    pos[2] = pos[1];
+    steppers.moveTo(pos);
+    steppers.run();
+}
+
+int * StepMotor::getPos()
+{
+    return mapPosToPercent(stepper1.currentPosition(), stepper2.currentPosition());
+}
+
+long * StepMotor::mapPercentToPos(int percentx, int percenty)
+{
+    static long positions[2];
+    float * steps = getPercentSteps();
+    positions[0] = steps[0] * percentx;
+    positions[1] = steps[1] * percenty;
+    return positions;
+}
+
+float * StepMotor::getPercentSteps()
+{
+    int rangex = xMax - xMin;
+    int rangey = yMax - yMin;
+    float stepx = rangex / 100;
+    float stepy = rangey / 100;
+    static float steps[2] = {stepx, stepy};
+    return steps;
+}
+
+int * StepMotor::mapPosToPercent(int posx, int posy)
+{
+    static int percentages[2];
+    float * steps = getPercentSteps();
+    percentages[0] = (int) posx/steps[0];
+    percentages[1] = (int) posy/steps[1];
+    return percentages;
 }
