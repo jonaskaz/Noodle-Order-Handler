@@ -1,2 +1,2 @@
-# Cup-Noodle
-A cup noodle topping dispensor
+# Cup Noodle Order Handler
+A system to get orders from Noodle API and send data to Noodle-Controller
