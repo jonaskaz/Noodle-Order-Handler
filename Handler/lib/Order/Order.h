@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
-#include <WiFiClientSecureBearSSL.h>
 #include <ArduinoJson.h>
 
 
@@ -11,6 +10,7 @@ public:
     void connectWifi();
     void getOrder();
     const char* url = "http://cupnoodle-api.herokuapp.com/order";
+    void sendOrder();
     WiFiClient client;
     HTTPClient http;
     int mode;
